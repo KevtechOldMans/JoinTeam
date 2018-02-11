@@ -28,7 +28,7 @@ namespace OnlineTeam
         private void Events_OnPlayerConnected(UnturnedPlayer player)
         {
             UnturnedChat.Say(player, "Es sind insgesamt " + CountTeam() + " Teamler online. Du erkennst sie an der roten Schrift!", Color.cyan);
-            UnturnedChat.Say(player, "Ausserdem sind " + CountHelp() + " Supporter, " + CountMod() + " Moderatoren und", Color.cyan);
+            UnturnedChat.Say(player, "Ausserdem sind " + CountHelp() + " Supporter, " + CountMod() + " Moderatoren und " + CountAdmin() + "Admins Online" , Color.cyan);
         }
 
         private int CountTeam()
