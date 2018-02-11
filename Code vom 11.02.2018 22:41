@@ -1,0 +1,115 @@
+using Rocket.API;
+using Rocket.API.Serialisation;
+using Rocket.Core;
+using Rocket.Core.Commands;
+using Rocket.Core.Plugins;
+using Rocket.Unturned;
+using Rocket.Unturned.Chat;
+using Rocket.Unturned.Player;
+using Rocket.Core.Logging;
+using SDG.Unturned;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+
+namespace OnlineTeam
+{
+    public class OnlineTeam : RocketPlugin
+    {
+        protected override void Load()
+        {
+            U.Events.OnPlayerConnected += Events_OnPlayerConnected;
+        }
+
+        protected override void Unload()
+        {
+            U.Events.OnPlayerConnected -= Events_OnPlayerConnected;
+        }
+        public void Say(IRocketPlayer caller, string msg)
+        {
+            if (caller is UnturnedPlayer)
+            {
+                UnturnedChat.Say(caller, msg, UnityEngine.Color.blue);
+            }
+            else
+            {
+                Rocket.Core.Logging.Logger.Log(msg);
+            }
+        }
+
+        private void Events_OnPlayerConnected(UnturnedPlayer player)
+        {
+            UnturnedChat.Say(player, "Es sind insgesamt " + CountTeam() + " Teamler online. Du erkennst sie an der roten Schrift!", Color.cyan);
+            UnturnedChat.Say(player, "Ausserdem sind " + CountHelp() + " Supporter, " + CountMod() + " Moderatoren und " + CountAdmin() + "Admins Online" , Color.cyan);
+        }
+        [RocketCommand("team", "Benutze /team", "team", AllowedCaller.Both)]
+        public void ExecuteteamCommand(IRocketPlayer caller, string[] args)
+        {
+            if (args.Length == 0)
+            {
+                UnturnedChat.Say(caller, "Es sind insgesamt " + CountTeam() + " Teamler online. Du erkennst sie an der roten Schrift!", Color.cyan);
+                UnturnedChat.Say(caller, "Ausserdem sind " + CountHelp() + " Supporter, " + CountMod() + " Moderatoren und " + CountAdmin() + "Admins Online", Color.cyan);
+            }
+        }
+
+        private int CountTeam()
+        {
+            int count = 0;
+            foreach(SteamPlayer steamplayer in Provider.clients)
+            {
+                UnturnedPlayer player = UnturnedPlayer.FromSteamPlayer(steamplayer);
+                RocketPermissionsGroup g = R.Permissions.GetGroups(player, false).Where(group => group.Id == "Supporter" || group.Id == "Moderator" || group.Id == "Administrator").FirstOrDefault();
+                if(g != null)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+        private int CountHelp()
+        {
+            int count = 0;
+            foreach (SteamPlayer steamplayer in Provider.clients)
+            {
+                UnturnedPlayer player = UnturnedPlayer.FromSteamPlayer(steamplayer);
+                RocketPermissionsGroup gp = R.Permissions.GetGroups(player, false).Where(group => group.Id == "Supporter").FirstOrDefault();
+                if (gp != null)
+                {
+                    count++;
+                }
+                return count;
+            }
+        }
+
+        private int CountMod()
+        {
+            int count = 0;
+            foreach (SteamPlayer steamplayer in Provider.clients)
+            {
+                UnturnedPlayer player = UnturnedPlayer.FromSteamPlayer(steamplayer);
+                RocketPermissionsGroup gm = R.Permissions.GetGroups(player, false).Where(group => group.Id == "Moderator").FirstOrDefault();
+                if (gm != null)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+        private int CountAdmin()
+        {
+            int count = 0;
+            foreach (SteamPlayer steamplayer in Provider.clients)
+            {
+                UnturnedPlayer player = UnturnedPlayer.FromSteamPlayer(steamplayer);
+                RocketPermissionsGroup ga = R.Permissions.GetGroups(player, false).Where(group => group.Id == "Administrator").FirstOrDefault();
+                if (ga != null)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+}
